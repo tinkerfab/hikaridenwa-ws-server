@@ -1,0 +1,13 @@
+.git
+*.md
+tests/
+.pytest_cache/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+secrets/*
+!secrets/app.env.example
+
+data/

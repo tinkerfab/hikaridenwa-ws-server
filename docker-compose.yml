@@ -1,0 +1,25 @@
+services:
+  hikaridenwa-ws-server:
+    build: .
+    container_name: hikaridenwa-ws-server
+    # SIP registration + inbound INVITE over UDP needs a stable, directly
+    # reachable port on the HGW's LAN — Docker's default bridge networking's
+    # NAT/port-rewriting plays badly with SIP for exactly this reason. Host
+    # networking sidesteps it entirely. Linux Docker hosts only: Docker
+    # Desktop on Mac/Windows runs containers inside a VM, so this does not
+    # expose the host's real LAN interface there (see README).
+    network_mode: host
+    environment:
+      - CONFIG_FILE=/app/config/app.env
+      - TZ=Asia/Tokyo
+    volumes:
+      # Read-only: unlike the dashboard-server project this split off from,
+      # there is no in-app settings page that writes back to this file, so
+      # a single-file read-only mount is sufficient (and safer).
+      - ./secrets/app.env:/app/config/app.env:ro
+      # app.log/sip.log persist here across container restarts/recreation.
+      # The host directory must exist and be owned by uid:gid 1000:1000
+      # before first run (see README) since the container runs as a
+      # non-root user.
+      - ./data:/app/data
+    restart: unless-stopped
